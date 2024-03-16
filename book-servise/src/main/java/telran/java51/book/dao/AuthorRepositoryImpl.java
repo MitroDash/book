@@ -27,7 +27,7 @@ public class AuthorRepositoryImpl implements AuthorRepository {
 
 	@Override
 	public void deleteById(String authorName) {
-		Optional<Author> author = Optional.ofNullable(em.find(Author.class, authorName));
+		Author author = em.find(Author.class, authorName);
 		em.remove(author);
 
 	}

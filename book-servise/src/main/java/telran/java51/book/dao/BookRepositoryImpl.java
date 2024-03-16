@@ -65,7 +65,7 @@ public class BookRepositoryImpl implements BookRepository {
 
 	@Override
 	public void deleteById(String isbn) {
-		Optional<Book> book = Optional.ofNullable(em.find(Book.class, isbn));
+		Book book = em.find(Book.class, isbn);
 		em.remove(book);
 
 	}
