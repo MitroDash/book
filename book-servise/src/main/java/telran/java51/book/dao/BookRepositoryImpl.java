@@ -1,10 +1,10 @@
 package telran.java51.book.dao;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,31 +22,26 @@ public class BookRepositoryImpl implements BookRepository {
 		TypedQuery<Book> query = em.createQuery(
 		        "SELECT b FROM Book b JOIN b.authors a WHERE a.name = :author", Book.class);
 		    query.setParameter("author", author);
-		    List<Book> resultList = query.getResultList();
-		    return resultList.stream();
+		    return query.getResultStream();
 	}
 
 	@Override
 	public Stream<Book> findByPublisherPublisherName(String publisher) {
 		 TypedQuery<Book> query = em.createQuery("SELECT b FROM Book b WHERE b.publisher.publisherName = :publisher", Book.class);
 		    query.setParameter("publisher", publisher);
-		    List<Book> resultList = query.getResultList();
-		    return resultList.stream();
+		    return query.getResultStream();
 	}
 
 	@Override
 	public void deleteByAuthorsName(String author) {
-		List<Book> booksToDelete = em.createQuery(
+		TypedQuery<Book> query = em.createQuery(
 	            "SELECT b FROM Book b JOIN b.authors a WHERE a.name = :author", Book.class)
-	            .setParameter("author", author)
-	            .getResultList();
-
-	    for (Book book : booksToDelete) {
-	        em.remove(book);
-	    }
+	            .setParameter("author", author);
+		query.executeUpdate();
 
 	}
 
+	@Transactional
 	@Override
 	public Book save(Book book) {
 		em.merge(book);
@@ -63,6 +58,7 @@ public class BookRepositoryImpl implements BookRepository {
 		return em.find(Book.class, isbn) != null;
 	}
 
+	@Transactional
 	@Override
 	public void deleteById(String isbn) {
 		Book book = em.find(Book.class, isbn);

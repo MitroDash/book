@@ -4,11 +4,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import telran.java51.book.model.Publisher;
 
+@Repository
 public class PublisherRepositoryImpl implements PublisherRepository {
 	
 	@PersistenceContext
@@ -20,18 +24,16 @@ public class PublisherRepositoryImpl implements PublisherRepository {
 	            "SELECT DISTINCT b.publisher.publisherName FROM Book b JOIN b.authors a WHERE a.name = :author",
 	            String.class);
 	    query.setParameter("author", author);
-	    List<String> publishers = query.getResultList();
-	    return publishers;
+	    return query.getResultList();
 	}
 
 	@Override
 	public Stream<Publisher> findDistinctByBooksAuthorsName(String authorName) {
-		TypedQuery<Publisher> query = em.createQuery(
-	            "SELECT DISTINCT b.publisher FROM Book b JOIN b.authors a WHERE a.name = :authorName", 
-	            Publisher.class);
-	    query.setParameter("authorName", authorName);
-	    List<Publisher> distinctPublishers = query.getResultList();
-	    return distinctPublishers.stream();
+		 TypedQuery<Publisher> query = em.createQuery(
+		            "SELECT DISTINCT b.publisher FROM Book b JOIN b.authors a WHERE a.name = :authorName", 
+		            Publisher.class);
+		    query.setParameter("authorName", authorName);
+		    return query.getResultStream();
 	}
 
 	@Override
@@ -39,6 +41,7 @@ public class PublisherRepositoryImpl implements PublisherRepository {
 		return Optional.ofNullable(em.find(Publisher.class, publisher));
 	}
 
+	@Transactional
 	@Override
 	public Publisher save(Publisher publisher) {
 		em.merge(publisher);
